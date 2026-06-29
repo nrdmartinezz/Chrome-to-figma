@@ -1,0 +1,20 @@
+{
+  "manifest_version": 3,
+  "name": "Site to Figma",
+  "version": "1.0.0",
+  "description": "Capture any website as Figma-ready designs at desktop, tablet, and mobile breakpoints.",
+  "permissions": [
+    "activeTab",
+    "scripting",
+    "debugger",
+    "storage",
+    "downloads"
+  ],
+  "host_permissions": ["<all_urls>"],
+  "action": {
+    "default_popup": "popup/popup.html"
+  },
+  "background": {
+    "service_worker": "background/service-worker.js"
+  }
+}

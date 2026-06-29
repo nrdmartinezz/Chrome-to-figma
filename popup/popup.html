@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Site to Figma</title>
+  <link rel="stylesheet" href="popup.css">
+</head>
+<body>
+  <div class="app">
+
+    <header class="header">
+      <svg class="logo" width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <rect width="28" height="28" rx="7" fill="#a259ff"/>
+        <rect x="6" y="6" width="6" height="6" rx="1.5" fill="white"/>
+        <rect x="6" y="16" width="6" height="6" rx="1.5" fill="white" opacity="0.7"/>
+        <rect x="16" y="6" width="6" height="6" rx="1.5" fill="white" opacity="0.7"/>
+        <rect x="16" y="16" width="6" height="6" rx="1.5" fill="white" opacity="0.5"/>
+      </svg>
+      <div class="header-text">
+        <h1>Site to Figma</h1>
+        <p>Capture responsive breakpoints</p>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="section-header">
+        <span class="section-title">Breakpoints</span>
+        <span class="section-hint">Width × Height</span>
+      </div>
+      <div class="breakpoints" id="breakpoints-list">
+        <!-- Populated by popup.js -->
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-header">
+        <span class="section-title">Options</span>
+      </div>
+      <div class="options-grid">
+        <label class="option-row">
+          <span class="option-label">Capture full page height</span>
+          <label class="toggle">
+            <input type="checkbox" id="opt-fullpage" checked>
+            <span class="slider"></span>
+          </label>
+        </label>
+        <label class="option-row">
+          <span class="option-label">Export DOM as SVG</span>
+          <label class="toggle">
+            <input type="checkbox" id="opt-svg" checked>
+            <span class="slider"></span>
+          </label>
+        </label>
+        <label class="option-row">
+          <span class="option-label">Export capture data (JSON)</span>
+          <label class="toggle">
+            <input type="checkbox" id="opt-json">
+            <span class="slider"></span>
+          </label>
+        </label>
+      </div>
+    </section>
+
+    <div class="action-area">
+      <button id="capture-btn" class="btn btn-primary">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="8" cy="8" r="2.5" fill="currentColor"/>
+        </svg>
+        Capture Page
+      </button>
+    </div>
+
+    <div id="progress-area" class="progress-area hidden">
+      <div class="progress-track">
+        <div class="progress-fill" id="progress-fill"></div>
+      </div>
+      <p class="progress-label" id="progress-label">Initialising...</p>
+    </div>
+
+    <div id="error-area" class="error-area hidden">
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <circle cx="8" cy="8" r="7" stroke="#f87171" stroke-width="1.5"/>
+        <path d="M8 4.5V8.5M8 11h.01" stroke="#f87171" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+      <p id="error-message"></p>
+    </div>
+
+    <div id="results-area" class="results-area hidden">
+      <div class="results-header">
+        <span class="section-title">Results</span>
+        <div class="export-actions">
+          <button class="btn btn-sm" id="export-png">⬇ PNGs</button>
+          <button class="btn btn-sm btn-accent" id="export-svg">⬇ SVGs</button>
+        </div>
+      </div>
+      <div class="previews" id="previews-container">
+        <!-- Populated by popup.js -->
+      </div>
+      <p class="figma-tip">
+        💡 Drag the SVG files into Figma for editable vector + text layers
+      </p>
+    </div>
+
+  </div>
+  <script src="../lib/svg-gen.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>
