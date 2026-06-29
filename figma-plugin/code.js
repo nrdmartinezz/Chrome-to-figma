@@ -178,7 +178,7 @@ async function loadFont(family, style) {
   try {
     await figma.loadFontAsync({ family, style });
     loadedFonts.add(key);
-  } catch {
+  } catch (_) {
     // fall back to Inter Regular
     await figma.loadFontAsync({ family: 'Inter', style: 'Regular' });
     loadedFonts.add('Inter:Regular');
@@ -297,7 +297,7 @@ async function createFigmaStructure(data) {
   try {
     section = figma.createSection();
     section.name = `${title} — Chrome to Figma`;
-  } catch {
+  } catch (_) {
     // Fallback: use a frame if createSection is unavailable
     section = figma.createFrame();
     section.name  = `${title} — Chrome to Figma`;
