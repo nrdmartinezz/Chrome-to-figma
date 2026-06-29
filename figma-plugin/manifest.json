@@ -1,0 +1,8 @@
+{
+  "name": "Chrome to Figma Importer",
+  "id": "chrome-to-figma-importer",
+  "api": "1.0.0",
+  "main": "code.js",
+  "ui": "ui.html",
+  "editorType": ["figma"]
+}

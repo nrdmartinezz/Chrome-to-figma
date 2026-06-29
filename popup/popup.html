@@ -93,13 +93,25 @@
         <div class="export-actions">
           <button class="btn btn-sm" id="export-png">⬇ PNGs</button>
           <button class="btn btn-sm btn-accent" id="export-svg">⬇ SVGs</button>
+          <button class="btn btn-sm btn-figma" id="export-figma">
+            <svg width="13" height="13" viewBox="0 0 28 28" fill="none">
+              <rect width="28" height="28" rx="5" fill="white" fill-opacity="0.2"/>
+              <rect x="6" y="6" width="6" height="6" rx="1.2" fill="white"/>
+              <rect x="6" y="16" width="6" height="6" rx="1.2" fill="white" opacity="0.7"/>
+              <rect x="16" y="6" width="6" height="6" rx="1.2" fill="white" opacity="0.7"/>
+              <rect x="16" y="16" width="6" height="6" rx="1.2" fill="white" opacity="0.5"/>
+            </svg>
+            Figma
+          </button>
         </div>
       </div>
       <div class="previews" id="previews-container">
         <!-- Populated by popup.js -->
       </div>
       <p class="figma-tip">
-        💡 Drag the SVG files into Figma for editable vector + text layers
+        � <strong>Figma Import:</strong> Click “Figma” to download the import JSON, then open the
+        <strong>Chrome to Figma Importer</strong> plugin in Figma and drop the file in.
+        Creates a Section with Desktop, Tablet &amp; Mobile frames using Auto Layout.
       </p>
     </div>
 

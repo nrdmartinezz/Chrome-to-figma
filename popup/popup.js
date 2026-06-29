@@ -172,6 +172,26 @@ function exportJSON() {
   setTimeout(() => URL.revokeObjectURL(url), 5000);
 }
 
+// ── Export: Figma import JSON ─────────────────────────────────────────────────
+function exportFigmaImport() {
+  if (!captureResults) return;
+  const data = {
+    capturedAt: new Date().toISOString(),
+    url:   captureResults.url,
+    title: captureResults.title,
+    captures: captureResults.captures.map(c => ({
+      breakpoint: c.breakpoint,
+      viewport:   c.domData?.viewport,
+      domTree:    c.domData?.domTree,
+    })),
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+  const url  = URL.createObjectURL(blob);
+  const slug = slugify(captureResults.title || 'capture');
+  downloadFile(`${slug}-figma-import.json`, url);
+  setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
 // ── Main capture flow ─────────────────────────────────────────────────────────
 async function startCapture() {
   const breakpoints = getBreakpoints();
@@ -234,4 +254,5 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('capture-btn').addEventListener('click', startCapture);
   document.getElementById('export-png').addEventListener('click', exportPNGs);
   document.getElementById('export-svg').addEventListener('click', exportSVGs);
+  document.getElementById('export-figma').addEventListener('click', exportFigmaImport);
 });

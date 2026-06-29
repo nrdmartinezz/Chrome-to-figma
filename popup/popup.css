@@ -280,6 +280,18 @@ body {
   border-color: var(--accent-hover);
 }
 
+.btn-figma {
+  background: #1abcfe;
+  border-color: #1abcfe;
+  color: white;
+  gap: 5px;
+}
+
+.btn-figma:hover:not(:disabled) {
+  background: #39c7fe;
+  border-color: #39c7fe;
+}
+
 .btn-sm {
   padding: 6px 12px;
   font-size: 12px;
