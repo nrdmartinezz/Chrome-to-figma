@@ -186,27 +186,26 @@ async function loadFont(family, style) {
 }
 
 async function createTextNode(text, styles) {
-  const node      = figma.createText();
-  const fw        = styles?.fontWeight || 'normal';
-  const isBold    = fw === 'bold' || +fw >= 600;
-  const figmaStyle = isBold ? 'Bold' : 'Regular';
+  var node      = figma.createText();
+  var fw        = (styles && styles.fontWeight) || 'normal';
+  var isBold    = fw === 'bold' || +fw >= 600;
+  var figmaStyle = isBold ? 'Bold' : 'Regular';
 
   await loadFont('Inter', figmaStyle);
   node.fontName   = { family: 'Inter', style: figmaStyle };
-  node.fontSize   = Math.max(parseFloat(styles?.fontSize) || 14, 1);
+  node.fontSize   = Math.max(parseFloat((styles && styles.fontSize)) || 14, 1);
   node.characters = text;
 
-  const textColor = parseCSSColor(styles?.color);
+  var textColor = parseCSSColor(styles && styles.color);
   node.fills = textColor
     ? [{ type: 'SOLID', color: textColor.color, opacity: textColor.opacity }]
     : [{ type: 'SOLID', color: { r: 0, g: 0, b: 0 } }];
 
-  switch (styles?.textAlign) {
-    case 'center':  node.textAlignHorizontal = 'CENTER';    break;
-    case 'right':   node.textAlignHorizontal = 'RIGHT';     break;
-    case 'justify': node.textAlignHorizontal = 'JUSTIFIED'; break;
-    default:        node.textAlignHorizontal = 'LEFT';
-  }
+  var textAlign = styles && styles.textAlign;
+  if (textAlign === 'center')       node.textAlignHorizontal = 'CENTER';
+  else if (textAlign === 'right')   node.textAlignHorizontal = 'RIGHT';
+  else if (textAlign === 'justify') node.textAlignHorizontal = 'JUSTIFIED';
+  else                              node.textAlignHorizontal = 'LEFT';
 
   node.textAutoResize = 'WIDTH_AND_HEIGHT';
   return node;
@@ -311,8 +310,8 @@ async function createFigmaStructure(data) {
   for (const capture of captures) {
     const { breakpoint, viewport, domTree } = capture;
 
-    const bpW = breakpoint.width;
-    const bpH = viewport?.fullHeight || breakpoint.height;
+    var bpW = breakpoint.width;
+    var bpH = (viewport && viewport.fullHeight) || breakpoint.height;
 
     // Breakpoint frame
     const bpFrame = figma.createFrame();
@@ -326,9 +325,9 @@ async function createFigmaStructure(data) {
 
     // Walk the DOM tree and build child nodes
     if (domTree) {
-      const baseX = domTree.rect?.x || 0;
-      const baseY = domTree.rect?.y || 0;
-      const bodyChildren = domTree.children || [];
+      var baseX = (domTree.rect && domTree.rect.x) || 0;
+      var baseY = (domTree.rect && domTree.rect.y) || 0;
+      var bodyChildren = domTree.children || [];
       for (const child of bodyChildren) {
         await buildNodes(bpFrame, child, baseX, baseY);
       }
