@@ -55,12 +55,12 @@ async function runCapture(options) {
     for (let i = 0; i < breakpoints.length; i++) {
       const bp = breakpoints[i];
 
-      // Notify popup of progress
+      // ── Step 1: resize viewport ─────────────────────────────────────────
       chrome.runtime.sendMessage({
         action: 'CAPTURE_PROGRESS',
         step: i + 1,
         total: breakpoints.length,
-        label: `Capturing ${bp.label} (${bp.width}px)…`,
+        label: `Resizing to ${bp.label} (${bp.width}px)…`,
       }).catch(() => {});
 
       // Set viewport dimensions
@@ -83,8 +83,30 @@ async function runCapture(options) {
         func: () => window.scrollTo(0, 0),
       });
 
-      // Wait for CSS transitions / lazy images / reflows
-      await sleep(800);
+      // ── Step 2: wait for the page to fully settle ──────────────────────
+      chrome.runtime.sendMessage({
+        action: 'CAPTURE_PROGRESS',
+        step: i + 1,
+        total: breakpoints.length,
+        label: `Waiting for ${bp.label} to fully load…`,
+      }).catch(() => {});
+
+      await waitForPageSettled(tabId);
+
+      // Scroll back to top — lazy-loading may have triggered scroll
+      await chrome.scripting.executeScript({
+        target: { tabId },
+        func: () => window.scrollTo(0, 0),
+      });
+      await sleep(150);
+
+      // ── Step 3: capture ────────────────────────────────────────────────
+      chrome.runtime.sendMessage({
+        action: 'CAPTURE_PROGRESS',
+        step: i + 1,
+        total: breakpoints.length,
+        label: `Capturing ${bp.label} elements…`,
+      }).catch(() => {});
 
       // Take screenshot
       const screenshotParams = {
@@ -128,6 +150,53 @@ function debuggerCmd(tabId, method, params = {}) {
   return chrome.debugger.sendCommand({ tabId }, method, params);
 }
 
+// ── Wait for the page to fully load and layout to settle ─────────────────────
+// Polls document.readyState and image completion up to MAX_MS before giving up.
+async function waitForPageSettled(tabId) {
+  const MAX_MS   = 10000; // Maximum time to wait (10 s)
+  const POLL_MS  = 300;   // How often to check
+  const start    = Date.now();
+
+  while (Date.now() - start < MAX_MS) {
+    let ready = false;
+    try {
+      const [res] = await chrome.scripting.executeScript({
+        target: { tabId },
+        func: function () {
+          // 1. Document must be fully parsed and loaded
+          if (document.readyState !== 'complete') return false;
+
+          // 2. All <img> elements must have finished loading
+          var imgs = document.querySelectorAll('img[src]');
+          for (var i = 0; i < imgs.length; i++) {
+            if (!imgs[i].complete) return false;
+          }
+
+          // 3. No pending CSS animations or transitions on body-level elements
+          //    (getAnimations is Chrome 84+; skip gracefully if unavailable)
+          if (typeof document.body.getAnimations === 'function') {
+            var anims = document.body.getAnimations();
+            for (var j = 0; j < anims.length; j++) {
+              if (anims[j].playState === 'running') return false;
+            }
+          }
+
+          return true;
+        },
+      });
+      ready = res && res.result === true;
+    } catch (_e) {
+      // Page not yet scriptable — keep polling
+    }
+
+    if (ready) break;
+    await sleep(POLL_MS);
+  }
+
+  // Extra pause for JS-framework re-renders (React/Vue/Angular hydration, etc.)
+  await sleep(600);
+}
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -166,16 +235,21 @@ function captureDOM() {
   }
 
   function serializeNode(el, depth) {
-    if (depth > 25) return null;
+    if (depth > 40) return null;
     if (!el || el.nodeType !== Node.ELEMENT_NODE) return null;
 
     const tag = el.tagName.toLowerCase();
 
-    // Skip script / style / noscript / meta
-    if (['script', 'style', 'noscript', 'meta', 'head', 'link'].includes(tag)) return null;
+    // Skip non-visual tags
+    if (['script', 'style', 'noscript', 'meta', 'head', 'link',
+         'template', 'slot', 'base'].includes(tag)) return null;
 
     const cs = window.getComputedStyle(el);
-    if (cs.display === 'none' || cs.visibility === 'hidden') return null;
+
+    // Skip truly hidden elements; but keep opacity-0 (structure preserved)
+    if (cs.display === 'none') return null;
+    // Only skip visibility:hidden on non-root elements
+    if (depth > 0 && cs.visibility === 'hidden') return null;
 
     const rect   = el.getBoundingClientRect();
     const scrollX = window.scrollX;
